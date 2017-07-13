@@ -31,6 +31,7 @@
 #include <velodyne_msgs/VelodyneScan.h>
 #include <velodyne_pointcloud/point_types.h>
 #include <velodyne_pointcloud/calibration.h>
+#include <lidar_utils/pointxyzdata.h>
 
 namespace velodyne_rawdata
 {
@@ -151,6 +152,7 @@ namespace velodyne_rawdata
 
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc, int cpi, int nppm);
+    void unpack(const velodyne_msgs::VelodynePacket &pkt, pcl::PointCloud<PointXYZData> &pc, int cpi, int nppm);
     
     void setParameters(double min_range, double max_range, double view_direction,
                        double view_width);
