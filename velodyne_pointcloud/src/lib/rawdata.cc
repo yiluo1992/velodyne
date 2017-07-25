@@ -140,7 +140,85 @@ int RawData::setupOffline(std::string calibration_file, double max_range_, doubl
 
   // Set up time table
   // Read firing time table
-  std::string timeTable = "/mnt/truenas/scratch/yiluo/calibration/firingTimeTable.txt";
+  std::string timeTable = velodyne_rawdata::fire_time_table_S2; // use S2 by default
+
+  FILE *fp = fopen(timeTable.c_str(), "r");
+  if (!fp)
+  {
+    std::cout << "Could not open time table file:  " << timeTable << std::endl;
+  }
+  else
+  {
+    int num_line_read = 0;
+    while (!feof(fp))
+    {
+      double T[16];
+      if (fscanf(fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",
+                 &T[0], &T[1], &T[2], &T[3], &T[4], &T[5], &T[6], &T[7], &T[8], &T[9], &T[10], &T[11], &T[12], &T[13], &T[14], &T[15]) == 16)
+      {
+        // for odd packet
+        int current_block_index = num_line_read;
+        int beam_offset = 0;
+
+        // for even packet
+        if (num_line_read > 11)
+        {
+          current_block_index = num_line_read - 12;
+          beam_offset = 16;
+        }
+
+        // set time table
+        for (int i = 0; i < 16; i++)
+        {
+          // upper
+          fire_time_table[current_block_index][i + beam_offset] = T[i];
+          // lower
+          fire_time_table[current_block_index][i + beam_offset + 32] = T[i];
+        }
+
+        // increase line counter
+        num_line_read += 1;
+      }
+    }
+  }
+  fclose(fp);
+
+  return 0;
+}
+
+int RawData::setupOffline(std::string calibration_file, double max_range_, double min_range_, int velodyne_version_)
+{
+
+  config_.max_range = max_range_;
+  config_.min_range = min_range_;
+  ROS_INFO_STREAM("data ranges to publish: ["
+                  << config_.min_range << ", "
+                  << config_.max_range << "]");
+
+  config_.calibrationFile = calibration_file;
+
+  ROS_INFO_STREAM("correction angles: " << config_.calibrationFile);
+
+  calibration_.read(config_.calibrationFile);
+  if (!calibration_.initialized)
+  {
+    ROS_ERROR_STREAM("Unable to open calibration file: " << config_.calibrationFile);
+    return -1;
+  }
+
+  // Set up cached values for sin and cos of all the possible headings
+  for (uint16_t rot_index = 0; rot_index < ROTATION_MAX_UNITS; ++rot_index)
+  {
+    float rotation = angles::from_degrees(ROTATION_RESOLUTION * rot_index);
+    cos_rot_table_[rot_index] = cosf(rotation);
+    sin_rot_table_[rot_index] = sinf(rotation);
+  }
+
+  // Set up time table
+  // Read firing time table
+  std::string timeTable = velodyne_rawdata::fire_time_table_S2; // use S2 by default
+  if(velodyne_version_ == 3)
+    timeTable = velodyne_rawdata::fire_time_table_S3;
 
   FILE *fp = fopen(timeTable.c_str(), "r");
   if (!fp)

@@ -35,6 +35,10 @@
 
 namespace velodyne_rawdata
 {
+  // firing time table path
+  static const std::string fire_time_table_S2 = "/mnt/truenas/scratch/yiluo/calibration/firingTimeTableS2.txt";
+  static const std::string fire_time_table_S3 = "/mnt/truenas/scratch/yiluo/calibration/firingTimeTableS3.txt";
+
   // Shorthand typedefs for point cloud representations
   typedef velodyne_pointcloud::PointXYZIR VPoint;
   typedef pcl::PointCloud<VPoint> VPointCloud;
@@ -149,6 +153,20 @@ namespace velodyne_rawdata
       *           errno value for failure
      */
     int setupOffline(std::string calibration_file, double max_range_, double min_range_);
+
+    /** \brief Set up for data processing offline. 
+      * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
+      * this method is useful if unpacking data directly from bag files, without passing 
+      * through a communication overhead.
+      * 
+      * @param calibration_file path to the calibration file
+      * @param max_range_ cutoff for maximum range
+      * @param min_range_ cutoff for minimum range
+      * @param velodyne_version_ velodyne version S2 or S3
+      * @returns 0 if successful;
+      *           errno value for failure
+     */
+    int setupOffline(std::string calibration_file, double max_range_, double min_range_, int velodyne_version_);
 
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc, int cpi, int nppm);
