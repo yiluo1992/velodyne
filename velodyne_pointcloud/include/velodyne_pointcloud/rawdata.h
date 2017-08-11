@@ -168,6 +168,20 @@ namespace velodyne_rawdata
      */
     int setupOffline(std::string calibration_file, double max_range_, double min_range_, int velodyne_version_);
 
+    /** \brief Set up for data processing offline. 
+      * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
+      * this method is useful if unpacking data directly from bag files, without passing 
+      * through a communication overhead.
+      * 
+      * @param calibration_file path to the calibration file
+      * @param max_range_ cutoff for maximum range
+      * @param min_range_ cutoff for minimum range
+      * @param firing_time_table_file path of the firing time table file
+      * @returns 0 if successful;
+      *           errno value for failure
+     */
+    int setupOffline(std::string calibration_file, double max_range_, double min_range_, std::string firing_time_table_file);
+
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc, int cpi, int nppm);
     void unpack(const velodyne_msgs::VelodynePacket &pkt, pcl::PointCloud<PointXYZData> &pc, int cpi, int nppm);
