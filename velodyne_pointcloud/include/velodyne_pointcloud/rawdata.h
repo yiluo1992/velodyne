@@ -53,7 +53,7 @@ namespace velodyne_rawdata
 
   static const float ROTATION_RESOLUTION      =     0.01f;  // [deg]
   static const uint16_t ROTATION_MAX_UNITS    = 36000u;     // [deg/100]
-  static const float DISTANCE_RESOLUTION      =     0.002f; // [m]
+  static float DISTANCE_RESOLUTION      =     0.002f; // [m]
 
   static const int BLOCK_PER_PACKET = 12;
   static const int BEAM_NUM = 64;
@@ -62,7 +62,6 @@ namespace velodyne_rawdata
   static const uint16_t UPPER_BANK = 0xeeff;
   static const uint16_t LOWER_BANK = 0xddff;
   
-  
   /** Special Defines for VLP16 support **/
   static const int    VLP16_FIRINGS_PER_BLOCK =   2;
   static const int    VLP16_SCANS_PER_FIRING  =  16;
@@ -70,7 +69,6 @@ namespace velodyne_rawdata
   static const float  VLP16_DSR_TOFFSET       =   2.304f;   // [µs]
   static const float  VLP16_FIRING_TOFFSET    =  55.296f;   // [µs]
   
-
   /** \brief Raw Velodyne data block.
    *
    *  Each block contains data from either the upper or lower laser
@@ -180,7 +178,7 @@ namespace velodyne_rawdata
       * @returns 0 if successful;
       *           errno value for failure
      */
-    int setupOffline(std::string calibration_file, double max_range_, double min_range_, std::string firing_time_table_file);
+    int setupOffline(std::string calibration_file, double max_range_, double min_range_, std::string firing_time_table_file, int velodyne_version_);
 
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc, int cpi, int nppm);

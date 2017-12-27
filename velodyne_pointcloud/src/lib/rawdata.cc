@@ -215,6 +215,7 @@ int RawData::setupOffline(std::string calibration_file, double max_range_, doubl
   }
 
   // Set up time table
+
   // Read firing time table
   std::string timeTable = velodyne_rawdata::fire_time_table_S2; // use S2 by default
   if(velodyne_version_ == 3)
@@ -264,7 +265,7 @@ int RawData::setupOffline(std::string calibration_file, double max_range_, doubl
   return 0;
 }
 
-int RawData::setupOffline(std::string calibration_file, double max_range_, double min_range_, std::string firing_time_table_file)
+int RawData::setupOffline(std::string calibration_file, double max_range_, double min_range_, std::string firing_time_table_file, int velodyne_version_)
 {
 
   config_.max_range = max_range_;
@@ -295,6 +296,10 @@ int RawData::setupOffline(std::string calibration_file, double max_range_, doubl
   // Set up time table
   // Read firing time table
   std::string timeTable = firing_time_table_file;
+
+  // Setup distance resolution
+  if(velodyne_version_ == 4)
+    velodyne_rawdata::DISTANCE_RESOLUTION = 0.004f; // [m]
 
   FILE *fp = fopen(timeTable.c_str(), "r");
   if (!fp)
@@ -550,7 +555,8 @@ void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
       /** Time correction Calculation*/
 
       float time_correction_in_packet  = (288.0 - fire_time_table[i][laser_number])/288.0;
-      float time_correction_in_msg = (cpi + time_correction_in_packet)/float(nppm);
+      // float time_correction_in_msg = (cpi + time_correction_in_packet)/float(nppm);
+      float time_correction_in_msg = (cpi)/float(nppm);
       // std::cout << time_correction_in_msg << "\n";
       
 
@@ -563,7 +569,7 @@ void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
           in the interesting defined area (min_angle < area < max_angle)*/
       if ((raw->blocks[i].rotation >= config_.min_angle && raw->blocks[i].rotation <= config_.max_angle && config_.min_angle < config_.max_angle) || (config_.min_angle > config_.max_angle && (raw->blocks[i].rotation <= config_.max_angle || raw->blocks[i].rotation >= config_.min_angle)))
       {
-        float distance = tmp.uint * DISTANCE_RESOLUTION;
+        float distance = tmp.uint * velodyne_rawdata::DISTANCE_RESOLUTION;
         distance += corrections.dist_correction;
 
         float cos_vert_angle = corrections.cos_vert_correction;
@@ -736,7 +742,7 @@ void RawData::unpack(const velodyne_msgs::VelodynePacket &pkt,
           in the interesting defined area (min_angle < area < max_angle)*/
       if ((raw->blocks[i].rotation >= config_.min_angle && raw->blocks[i].rotation <= config_.max_angle && config_.min_angle < config_.max_angle) || (config_.min_angle > config_.max_angle && (raw->blocks[i].rotation <= config_.max_angle || raw->blocks[i].rotation >= config_.min_angle)))
       {
-        float distance = tmp.uint * DISTANCE_RESOLUTION;
+        float distance = tmp.uint * velodyne_rawdata::DISTANCE_RESOLUTION;
         distance += corrections.dist_correction;
 
         float cos_vert_angle = corrections.cos_vert_correction;
@@ -921,7 +927,7 @@ void RawData::unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt,
         {
 
           // convert polar coordinates to Euclidean XYZ
-          float distance = tmp.uint * DISTANCE_RESOLUTION;
+          float distance = tmp.uint * velodyne_rawdata::DISTANCE_RESOLUTION;
           distance += corrections.dist_correction;
 
           float cos_vert_angle = corrections.cos_vert_correction;
