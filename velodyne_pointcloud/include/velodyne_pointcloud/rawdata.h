@@ -36,8 +36,8 @@
 namespace velodyne_rawdata
 {
   // firing time table path
-  static const std::string fire_time_table_S2 = "/mnt/truenas/scratch/yiluo/calibration/firingTimeTableS2.txt";
-  static const std::string fire_time_table_S3 = "/mnt/truenas/scratch/yiluo/calibration/firingTimeTableS3.txt";
+  static const std::string fire_time_table_S2 = "../config/firing_time_table_s2.txt";
+  static const std::string fire_time_table_S3 = "../config/firing_time_table_s3.txt";
 
   // Shorthand typedefs for point cloud representations
   typedef velodyne_pointcloud::PointXYZIR VPoint;
@@ -54,6 +54,7 @@ namespace velodyne_rawdata
   static const float ROTATION_RESOLUTION      =     0.01f;  // [deg]
   static const uint16_t ROTATION_MAX_UNITS    = 36000u;     // [deg/100]
   static float DISTANCE_RESOLUTION      =     0.002f; // [m]
+  
 
   static const int BLOCK_PER_PACKET = 12;
   static const int BEAM_NUM = 64;
@@ -139,32 +140,32 @@ namespace velodyne_rawdata
      */
     int setup(ros::NodeHandle private_nh);
 
-    /** \brief Set up for data processing offline. 
-      * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
-      * this method is useful if unpacking data directly from bag files, without passing 
-      * through a communication overhead.
-      * 
-      * @param calibration_file path to the calibration file
-      * @param max_range_ cutoff for maximum range
-      * @param min_range_ cutoff for minimum range
-      * @returns 0 if successful;
-      *           errno value for failure
-     */
-    int setupOffline(std::string calibration_file, double max_range_, double min_range_);
+    // /** \brief Set up for data processing offline. 
+    //   * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
+    //   * this method is useful if unpacking data directly from bag files, without passing 
+    //   * through a communication overhead.
+    //   * 
+    //   * @param calibration_file path to the calibration file
+    //   * @param max_range_ cutoff for maximum range
+    //   * @param min_range_ cutoff for minimum range
+    //   * @returns 0 if successful;
+    //   *           errno value for failure
+    //  */
+    // int setupOffline(std::string calibration_file, double max_range_, double min_range_);
 
-    /** \brief Set up for data processing offline. 
-      * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
-      * this method is useful if unpacking data directly from bag files, without passing 
-      * through a communication overhead.
-      * 
-      * @param calibration_file path to the calibration file
-      * @param max_range_ cutoff for maximum range
-      * @param min_range_ cutoff for minimum range
-      * @param velodyne_version_ velodyne version S2 or S3
-      * @returns 0 if successful;
-      *           errno value for failure
-     */
-    int setupOffline(std::string calibration_file, double max_range_, double min_range_, int velodyne_version_);
+    // * \brief Set up for data processing offline. 
+    //   * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
+    //   * this method is useful if unpacking data directly from bag files, without passing 
+    //   * through a communication overhead.
+    //   * 
+    //   * @param calibration_file path to the calibration file
+    //   * @param max_range_ cutoff for maximum range
+    //   * @param min_range_ cutoff for minimum range
+    //   * @param velodyne_version_ velodyne version S2 or S3
+    //   * @returns 0 if successful;
+    //   *           errno value for failure
+     
+    // int setupOffline(std::string calibration_file, double max_range_, double min_range_, int velodyne_version_);
 
     /** \brief Set up for data processing offline. 
       * Performs the same initialization as in setup, in the abscence of a ros::NodeHandle.
@@ -178,12 +179,13 @@ namespace velodyne_rawdata
       * @returns 0 if successful;
       *           errno value for failure
      */
-    int setupOffline(std::string calibration_file, double max_range_, double min_range_, std::string firing_time_table_file, int velodyne_version_);
+    int setupOffline(std::string calibration_file, double max_range_, double min_range_, std::string firing_time_table_file = fire_time_table_S3, int velodyne_version_ = 2);
 
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc);
     void unpack(const velodyne_msgs::VelodynePacket &pkt, VPointCloud &pc, int cpi, int nppm);
     void unpack(const velodyne_msgs::VelodynePacket &pkt, pcl::PointCloud<PointXYZData> &pc, int cpi, int nppm);
-    
+    void unpack_vlp16(const velodyne_msgs::VelodynePacket &pkt, pcl::PointCloud<PointXYZData> &pc, int cpi, int nppm);
+
     void setParameters(double min_range, double max_range, double view_direction,
                        double view_width);
 
